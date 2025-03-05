@@ -101,6 +101,7 @@ Handles contact form submissions and sends an email
 ```http
 POST http://localhost:5000/send-email
 Content-Type: application/json
+```
 
 
 ```json
@@ -110,7 +111,7 @@ Content-Type: application/json
   "message": "Hi, I’m interested in your profile. Please get back to me.",
   "captchaResponse": "recaptcha-response-token"
 }
-
+```
 
 #### Example Response (Success):
 
