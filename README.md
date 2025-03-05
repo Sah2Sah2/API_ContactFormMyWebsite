@@ -9,6 +9,8 @@ The API uses Nodemailer to send emails and is configured with CORS and dotenv to
 - Validate input fields (name, email, and message) to ensure all fields are filled
 - Send emails using **Gmail** as the SMTP service (configured via environment variables)
 - Respond with success or error messages based on the outcome of the email sending process
+- **reCAPTCHA** verification to protect the contact form from spam and bots
+- **Rate Limiting** to limit the number of requests per user and prevent abuse
 
 ## Requirements
 
@@ -16,6 +18,8 @@ The API uses Nodemailer to send emails and is configured with CORS and dotenv to
 - **Nodemailer**: For email sending
 - **dotenv**: For environment variables
 - **CORS**: To handle cross-origin requests
+- **express-rate-limit**: To implement rate limiting
+- **node-fetch**: To make the HTTP request for reCAPTCHA verification
 
 ## Installation
 
@@ -42,6 +46,7 @@ The API uses Nodemailer to send emails and is configured with CORS and dotenv to
     ```bash
     EMAIL_USER=your-email@gmail.com
     EMAIL_PASS=your-email-password
+    RECAPTCHA_SECRET=your-recaptcha-secret
     ```
 
 > **Note**: For security, consider using an app-specific password for Gmail rather than your actual Gmail password
@@ -86,7 +91,8 @@ Handles contact form submissions and sends an email
 {
   "name": "Your Name",
   "email": "your-email@example.com",
-  "message": "Hello, I would like to get in touch."
+  "message": "Hello, I would like to get in touch.",
+  "captchaResponse": "recaptcha-response-token"
 }
 ```
 
@@ -96,12 +102,15 @@ Handles contact form submissions and sends an email
 POST http://localhost:5000/send-email
 Content-Type: application/json
 
+
+```json
 {
   "name": "John Doe",
   "email": "john.doe@example.com",
-  "message": "Hi, I’m interested in your profile. Please get back to me."
+  "message": "Hi, I’m interested in your profile. Please get back to me.",
+  "captchaResponse": "recaptcha-response-token"
 }
-```
+
 
 #### Example Response (Success):
 
@@ -127,7 +136,7 @@ Content-Type: application/json
 
 1. Create an account on [Render](https://render.com) - free version available
 2. Create a new web service and link it to your GitHub repository
-3. Set environment variables (e.g., `EMAIL_USER` and `EMAIL_PASS`) in the Render dashboard
+3. Set environment variables (e.g., `EMAIL_USER` `EMAIL_PASS` and `RECAPTCHA_SECRET`) in the Render dashboard
 4. Deploy the service, and your API will be available at a URL like `https://your-api-name.onrender.com/`
 
 ### 2. **Frontend Integration**
@@ -135,13 +144,18 @@ Content-Type: application/json
 - Make sure your frontend points to the correct backend URL when sending POST requests
 - Example: `https://your-api-name.onrender.com/send-email`
 
+### 3. **Security**
+
+-**Rate Limiting**: To prevent abuse, the `/send-email` route is rate-limited to 2 requests per IP every 30 minutes
+-**reCAPTCHA**: To protect the form from bots, the API requires a valid reCAPTCHA response. Obtain your reCAPTCHA secret key from Google reCAPTCHA.
+
 ---
 
 ## Troubleshooting
 
 If the email sending fails, check the following:
 - Ensure your Gmail credentials are correct and that you have enabled access for less secure apps if you're using Gmail's SMTP service
-- If you're using a service like Render, make sure the environment variables (`EMAIL_USER` and `EMAIL_PASS`) are correctly set in the Render dashboard
+- If you're using a service like Render, make sure the environment variables (`EMAIL_USER`, `EMAIL_PASS` and `RECAPTCHA_SECRET`) are correctly set in the Render dashboard
 
 ## Setting Up Gmail for Sending Emails
 
