@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const fetch = require('node-fetch'); // Add this to make the HTTP request for reCAPTCHA verification
+const fetch = require('node-fetch'); // reCAPTCHA verification
+const rateLimit = require('express-rate-limit'); // Import express-rate-limit
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,13 +12,20 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Apply rate limiting to the /send-email route
+const emailLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000, // time
+    max: 2, // num of requ from IP
+    message: 'Too many requests, please try again after 30 minutes.',
+});
+
 // Define the root route to respond to GET requests
 app.get("/", (req, res) => {
     res.send("Email API is running!");
 });
 
-// Email Sending Route
-app.post('/send-email', async (req, res) => {
+// Email Sending Route with rate limiting applied
+app.post('/send-email', emailLimiter, async (req, res) => {
     const { name, email, message, captchaResponse } = req.body;
 
     if (!name || !email || !message || !captchaResponse) {
