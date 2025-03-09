@@ -8,14 +8,17 @@ const rateLimit = require('express-rate-limit'); // Import express-rate-limit
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Apply rate limiting to the /send-email route
 const emailLimiter = rateLimit({
-    windowMs: 30 * 60 * 1000, // time
-    max: 2, // num of requests from the same IP
+    windowMs: 30 * 60 * 1000, // 30 minutes
+    max: 2, // Limit each IP to 2 requests per windowMs
     message: 'Too many requests, please try again after 30 minutes.',
 });
 
