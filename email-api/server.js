@@ -29,6 +29,8 @@ app.get("/", (req, res) => {
 
 // Email Sending Route with rate limiting applied
 app.post('/send-email', emailLimiter, async (req, res) => {
+    console.log('Received request body:', req.body); // Debugging log
+    
     const { name, email, message, captchaResponse } = req.body;
 
     if (!name || !email || !message || !captchaResponse) {
@@ -36,10 +38,12 @@ app.post('/send-email', emailLimiter, async (req, res) => {
     }
 
     // Step 1: Verify reCAPTCHA
-    const recaptchaVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaResponse}`;
-
     try {
-        const recaptchaVerifyResponse = await fetch(recaptchaVerifyUrl, { method: 'POST' });
+        const recaptchaVerifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `secret=${process.env.RECAPTCHA_SECRET}&response=${captchaResponse}&remoteip=${req.ip}`
+        });
         const recaptchaResult = await recaptchaVerifyResponse.json();
 
         if (!recaptchaResult.success) {
