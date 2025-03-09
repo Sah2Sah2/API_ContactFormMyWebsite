@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const fetch = require('node-fetch'); // reCAPTCHA verification
+const fetch = require('node-fetch'); // node-fetch v2 
 const rateLimit = require('express-rate-limit'); // Import express-rate-limit
 
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.json());
 // Apply rate limiting to the /send-email route
 const emailLimiter = rateLimit({
     windowMs: 30 * 60 * 1000, // time
-    max: 2, // num of requ from IP
+    max: 2, // num of requests from the same IP
     message: 'Too many requests, please try again after 30 minutes.',
 });
 
