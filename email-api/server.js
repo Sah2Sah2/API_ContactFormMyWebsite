@@ -30,8 +30,12 @@ app.get("/", (req, res) => {
 // Email Sending Route with rate limiting applied
 app.post('/send-email', emailLimiter, async (req, res) => {
     console.log('Received request body:', req.body); // Debugging log
-    
+
     const { name, email, message, captchaResponse } = req.body;
+
+    // Log the captcha response and IP address
+    console.log('captchaResponse:', captchaResponse); // Log the captcha response
+    console.log('IP Address:', req.ip); // Log the IP address
 
     if (!name || !email || !message || !captchaResponse) {
         return res.status(400).json({ error: 'All fields and reCAPTCHA are required' });
@@ -44,9 +48,15 @@ app.post('/send-email', emailLimiter, async (req, res) => {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `secret=${process.env.RECAPTCHA_SECRET}&response=${captchaResponse}&remoteip=${req.ip}`
         });
+        
         const recaptchaResult = await recaptchaVerifyResponse.json();
 
+        // Log the full reCAPTCHA verification result for debugging
+        console.log('reCAPTCHA verification result:', recaptchaResult);
+
         if (!recaptchaResult.success) {
+            // Log specific error codes from Google reCAPTCHA
+            console.error('reCAPTCHA error codes:', recaptchaResult['error-codes']);
             return res.status(400).json({ error: 'reCAPTCHA verification failed' });
         }
 
@@ -69,7 +79,7 @@ app.post('/send-email', emailLimiter, async (req, res) => {
         await transporter.sendMail(mailOptions);
         res.status(200).json({ success: 'Email sent successfully!' });
     } catch (error) {
-        console.error(error);
+        console.error('Error sending email:', error);
         res.status(500).json({ error: 'Failed to send email' });
     }
 });
