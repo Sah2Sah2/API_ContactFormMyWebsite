@@ -18,7 +18,7 @@ app.use(express.json());
 // Apply rate limiting to the /send-email route
 const emailLimiter = rateLimit({
     windowMs: 30 * 60 * 1000, // 30 minutes
-    max: 20, // Limit each IP to 2 requests per windowMs
+    max: 5, // Limit each IP to 5 requests per windowMs
     message: 'Too many requests, please try again after 30 minutes.',
 });
 
